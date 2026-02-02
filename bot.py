@@ -213,6 +213,10 @@ async def setup(interaction: discord.Interaction, channel: discord.channel.TextC
     bot.title = title
 
     msg = await channel.send(embed=await bot._create_embed())
+    
+    if bot.message_id is not None:
+        old_msg = await bot.get_channel(bot.channel_id).fetch_message(bot.message_id)
+        await old_msg.delete()
 
     new_config["message_id"] = msg.id
     bot.message_id = msg.id
@@ -221,6 +225,16 @@ async def setup(interaction: discord.Interaction, channel: discord.channel.TextC
     bot.scheduler.add_job(bot._update_message,
                           CronTrigger.from_crontab(f"* {bot.cron_hour} * * *"))
     await interaction.followup.send("Setup complete", ephemeral=True)
+
+@bot.tree.command(description="Display membership count")
+async def membership_count(interaction: discord.Interaction):
+    await interaction.response.defer()
+    
+    if bot.content is None:
+        await interaction.followup.send("Please setup the bot first", ephemeral=True)
+        return
+
+    await interaction.followup.send(embed=await bot._create_embed())
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
