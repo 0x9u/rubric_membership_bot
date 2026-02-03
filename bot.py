@@ -3,6 +3,7 @@ import aiohttp
 import yaml
 import json
 import discord
+from discord.ext import commands
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 import logging
@@ -235,6 +236,19 @@ async def membership_count(interaction: discord.Interaction):
         return
 
     await interaction.followup.send(embed=await bot._create_embed())
+    
+@bot.tree.command(description="Update membership count")
+@commands.has_permissions(manage_messages=True)
+async def update_membership_count(interaction: discord.Interaction):
+    await interaction.response.defer()
+    
+    if bot.content is None:
+        await interaction.followup.send("Please setup the bot first", ephemeral=True)
+        return
+
+    await bot._update_message()
+    
+    await interaction.followup.send("Updated membership count", ephemeral=True)
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
